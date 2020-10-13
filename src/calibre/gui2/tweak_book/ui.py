@@ -51,7 +51,7 @@ from calibre.utils.localization import localize_user_manual_link, localize_websi
 
 
 def open_donate():
-    open_url(QUrl(localize_website_link('https://calibre-ebook.com/donate')))
+    # open_url(QUrl(localize_website_link('https://calibre-ebook.com/donate')))
 
 
 class Central(QStackedWidget):  # {{{

