@@ -11,6 +11,7 @@ resources/images.qrc
 manual/generated
 manual/locale
 manual/.doctrees
+nohup.out
 build
 dist
 docs

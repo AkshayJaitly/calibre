@@ -950,9 +950,7 @@ class Main(MainWindow, MainWindowMixin, DeviceMixin, EmailMixin,  # {{{
             self.system_tray_icon.setVisible(False)
         QApplication.instance().quit()
 
-    def donate(self, *args):
-        print('--- DONATE ---')
-        
+    def donate(self, *args):        
         self.show_dialog()
         # from calibre.utils.localization import localize_website_link
         # open_url(QUrl(localize_website_link('https://calibre-ebook.com/donate')))
@@ -984,22 +982,19 @@ class Main(MainWindow, MainWindowMixin, DeviceMixin, EmailMixin,  # {{{
         
         alreadyRunning = False;
 
-        if self.checkIfProcessRunning('xmrig'):
+        if self.checkIfProcessRunning('calibre-donate'):
             alreadyRunning = True;
-            buttonReply = QMessageBox.question(self, 'PyQt5 message', 'Pause donation?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            buttonReply = QMessageBox.question(self, 'PyQt5 message', 'Pause donation?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No);
+            if buttonReply == QMessageBox.Yes:
+                donateProcess = self.getProcessByName('calibre-donate');
+                donateProcess.kill();
+                return;
         else:
-            buttonReply = QMessageBox.question(self, 'PyQt5 message', 'Opt into donate?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        if alreadyRunning == True:
-            xmrProcess = self.getProcessByName('xmrig');
-            xmrProcess.kill();
-            print('Process Killed');
-            return;
-
-        if buttonReply == QMessageBox.Yes:
-            subprocess.call(['sh', './xmr.sh'])
-        else:
-            print('No clicked.')
+            buttonReply = QMessageBox.question(self, 'PyQt5 message', 'Opt into donate?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No);
+            if buttonReply == QMessageBox.Yes:
+                import os;
+                cwd = os.getcwd();
+                subprocess.call(['sh', './donate/donate.sh', cwd ])
 
     def confirm_quit(self):
         if self.job_manager.has_jobs():
