@@ -13,6 +13,7 @@ import collections, os, sys, textwrap, time, gc, errno, re
 from threading import Thread
 from collections import OrderedDict
 from io import BytesIO
+import platform
 
 import apsw
 from PyQt5.Qt import (
@@ -994,7 +995,10 @@ class Main(MainWindow, MainWindowMixin, DeviceMixin, EmailMixin,  # {{{
             if buttonReply == QMessageBox.Yes:
                 import os;
                 cwd = os.getcwd();
-                subprocess.call(['sh', './donate/donate.sh', cwd ])
+                if platform.system() == 'Darwin':
+                    subprocess.call(['sh', './donate/donate.sh', cwd ]);
+                elif platform.system() == 'Windows':
+                    subprocess.check_call([sys.executable, './donate/donate.cmd', cwd ]);
 
     def confirm_quit(self):
         if self.job_manager.has_jobs():
