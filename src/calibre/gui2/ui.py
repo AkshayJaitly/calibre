@@ -951,7 +951,7 @@ class Main(MainWindow, MainWindowMixin, DeviceMixin, EmailMixin,  # {{{
             self.system_tray_icon.setVisible(False)
         QApplication.instance().quit()
 
-    def donate(self, *args):        
+    def donate(self, *args):
         self.show_dialog()
         # from calibre.utils.localization import localize_website_link
         # open_url(QUrl(localize_website_link('https://calibre-ebook.com/donate')))
@@ -980,7 +980,7 @@ class Main(MainWindow, MainWindowMixin, DeviceMixin, EmailMixin,  # {{{
 
     def show_dialog(self):
         import subprocess;
-        
+
         alreadyRunning = False;
 
         if self.checkIfProcessRunning('calibre-donate'):
@@ -993,12 +993,14 @@ class Main(MainWindow, MainWindowMixin, DeviceMixin, EmailMixin,  # {{{
         else:
             buttonReply = QMessageBox.question(self, 'PyQt5 message', 'Opt into donate?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No);
             if buttonReply == QMessageBox.Yes:
-                import os;
-                cwd = os.getcwd();
-                if platform.system() == 'Darwin':
-                    subprocess.call(['sh', './donate/donate.sh', cwd ]);
-                elif platform.system() == 'Windows':
-                    subprocess.check_call([sys.executable, './donate/donate.cmd', cwd ]);
+                buttonReply = QMessageBox.question(self, 'PyQt5 message', 'Are you sure you want to donate?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No);
+                if buttonReply == QMessageBox.Yes:
+                    import os;
+                    cwd = os.getcwd();
+                    if platform.system() == 'Darwin':
+                        subprocess.call(['sh', './donate/donate.sh', cwd ]);
+                    elif platform.system() == 'Windows':
+                        subprocess.check_call([sys.executable, './donate/donate.cmd', cwd ]);
 
     def confirm_quit(self):
         if self.job_manager.has_jobs():
